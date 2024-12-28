@@ -128,4 +128,26 @@ class HomeController extends Controller
         $homes = Home::all();
         return view('stock.index', compact('homes'));
     }
+
+    public function detail($id)
+    {
+        $barang = Home::findOrFail($id);
+        
+        // Mengambil histori barang masuk
+        $barangMasuk = \App\Models\BarangMasuk::where('nama_barang', $barang->namaBarang)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+            
+        // Mengambil histori barang keluar
+        $barangKeluar = \App\Models\BarangKeluar::where('nama_barang', $barang->namaBarang)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+            
+        // Mengambil histori peminjaman
+        $peminjaman = \App\Models\Peminjaman::where('nama_barang', $barang->namaBarang)
+            ->orderBy('tanggal_pinjam', 'desc')
+            ->get();
+
+        return view('home.detail', compact('barang', 'barangMasuk', 'barangKeluar', 'peminjaman'));
+    }
 }

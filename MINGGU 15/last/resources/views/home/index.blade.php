@@ -104,7 +104,12 @@
                         @foreach($homes as $index)
                         <tr>
                             <td>{{ $index->id }}</td>
-                            <td>{{ $index->namaBarang }}</td>
+                            <td>
+                                <a href="{{ route('home.detail', $index->id) }}" 
+                                   class="text-decoration-none text-dark font-weight-bold">
+                                    {{ $index->namaBarang }}
+                                </a>
+                            </td>
                             <td>
                                 @if($index->gambar && Storage::disk('public')->exists('gambar/' . $index->gambar))
                                     <img src="{{ asset('storage/gambar/' . $index->gambar) }}" 
