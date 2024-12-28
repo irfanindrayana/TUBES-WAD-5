@@ -1,0 +1,303 @@
+@extends('layouts.app')
+
+@section('title', 'Inventory')
+
+@section('content')
+<div class="container-fluid">
+    <h1 class="mt-4 mb-4">GUDANG</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            @if(Auth::user()->isAdmin())
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tambahBarangModal">
+                    Tambah Barang
+                </button>
+                <a href="{{ route('home.export') }}" class="btn btn-info">Export Data</a>
+            @endif
+        </div>
+
+        <!-- Modal Tambah Barang -->
+        <div class="modal fade" id="tambahBarangModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">TAMBAH BARANG</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <form method="POST" action="{{ route('home.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Nama Barang</label>
+                                <input type="text" name="namaBarang" class="form-control" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Gambar Barang</label>
+                                <div class="image-preview mb-2" id="imagePreview">
+                                    <img id="preview" src="#" alt="Preview" style="display: none; max-width: 100%; max-height: 200px;">
+                                    <div id="placeholder-text" class="text-center">
+                                        <p class="mb-0">Preview gambar akan muncul di sini</p>
+                                    </div>
+                                </div>
+                                <input type="file" name="gambar" class="form-control" id="gambar">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Deskripsi</label>
+                                <textarea name="deskripsi" class="form-control" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Stok Awal</label>
+                                <input type="number" name="stok" class="form-control" required min="0">
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            @foreach($datastok as $item)
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>PERHATIAN!</strong> Stok <strong>{{ $item->namaBarang }}</strong> akan habis.
+            </div>
+            @endforeach
+            
+            <div class="table-responsive">
+                <table id="datatablesSimple" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Gambar</th>
+                            <th>Deskripsi</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($homes as $index)
+                        <tr>
+                            <td>{{ $index->id }}</td>
+                            <td>{{ $index->namaBarang }}</td>
+                            <td>
+                                @if($index->gambar && Storage::disk('public')->exists('gambar/' . $index->gambar))
+                                    <img src="{{ asset('storage/gambar/' . $index->gambar) }}" 
+                                         alt="{{ $index->namaBarang }}" 
+                                         width="100"
+                                         class="img-thumbnail">
+                                @else
+                                    <img src="{{ asset('storage/gambar/default.png') }}" 
+                                         alt="Default" 
+                                         width="100"
+                                         class="img-thumbnail">
+                                @endif
+                            </td>
+                            <td>{{ $index->deskripsi }}</td>
+                            <td>{{ $index->stok }}</td>
+                            <td>
+                                @if(Auth::user()->isAdmin())
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{ $index->id }}" data-toggle="tooltip" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{ $index->id }}" data-toggle="tooltip" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Edit -->
+    @foreach($homes as $item)
+    <div class="modal fade" id="edit{{ $item->id }}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">EDIT BARANG</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form method="POST" action="{{ route('home.update',$item->id) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nama Barang</label>
+                            <input type="text" name="namaBarang" value="{{ $item->namaBarang }}" class="form-control" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>Gambar Barang</label>
+                            <div class="image-preview mb-2" id="imagePreview{{ $item->id }}">
+                                <img id="preview{{ $item->id }}" 
+                                     src="{{ $item->gambar && Storage::disk('public')->exists('gambar/' . $item->gambar) 
+                                           ? asset('storage/gambar/' . $item->gambar) 
+                                           : asset('storage/gambar/default.png') }}" 
+                                     alt="Preview" 
+                                     style="display: block; max-width: 100%; max-height: 200px;">
+                            </div>
+                            <input type="file" name="gambar" class="form-control" id="gambar{{ $item->id }}">
+                            <small class="text-muted">Biarkan kosong jika tidak ingin mengubah gambar</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Deskripsi</label>
+                            <textarea name="deskripsi" class="form-control" required>{{ $item->deskripsi }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Stok</label>
+                            <input type="number" name="stok" value="{{ $item->stok }}" class="form-control" required min="0">
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete -->
+    <div class="modal fade" id="delete{{ $item->id }}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">HAPUS BARANG</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form method="POST" action="{{ route('home.destroy', $item->id) }}">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-body">
+                        <p>Apakah anda yakin menghapus <strong>{{ $item->namaBarang }}?</strong></p>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+@push('scripts')
+<style>
+.image-preview {
+    width: 100%;
+    min-height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#preview {
+    max-width: 100%;
+    max-height: 200px;
+    display: none;
+}
+
+#placeholder-text {
+    color: #999;
+    text-align: center;
+}
+
+/* Style untuk tombol aksi */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    margin: 0 2px;
+}
+
+.btn-sm i {
+    font-size: 1rem;
+}
+
+/* Efek hover untuk tombol */
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inisialisasi tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+
+    const gambarInput = document.getElementById('gambar');
+    const preview = document.getElementById('preview');
+    const placeholderText = document.getElementById('placeholder-text');
+
+    gambarInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholderText.style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    @foreach($homes as $item)
+        const editGambarInput{{ $item->id }} = document.getElementById('gambar{{ $item->id }}');
+        const editPreview{{ $item->id }} = document.getElementById('preview{{ $item->id }}');
+
+        editGambarInput{{ $item->id }}.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editPreview{{ $item->id }}.src = e.target.result;
+                    editPreview{{ $item->id }}.style.display = 'block';
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    @endforeach
+});
+</script>
+@endpush
+@endsection
