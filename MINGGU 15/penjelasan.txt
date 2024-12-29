@@ -1,0 +1,2 @@
+Code laravel yang saya berikan ini merupakan code dengan fitur-fitur terintegrasi. Code laravel yang hanya berisikan fitur saya sendiri 
+(inventory) sudah tidak ada. Terima kasih perhatiannya.

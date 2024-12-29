@@ -84,7 +84,7 @@
             @foreach($datastok as $item)
             <div class="alert alert-danger alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong>PERHATIAN!</strong> Stok <strong>{{ $item->namaBarang }}</strong> akan habis.
+                <strong>PERHATIAN!</strong> Stok <strong>{{ $item->namaBarang }}</strong> saat ini ({{ $item->stok }}) telah mencapai batas minimal ({{ $item->stok_minimal }}).
             </div>
             @endforeach
             
@@ -104,7 +104,12 @@
                         @foreach($homes as $index)
                         <tr>
                             <td>{{ $index->id }}</td>
-                            <td>{{ $index->namaBarang }}</td>
+                            <td>
+                                <a href="{{ route('home.detail', $index->id) }}" 
+                                   class="text-decoration-none text-dark font-weight-bold">
+                                    {{ $index->namaBarang }}
+                                </a>
+                            </td>
                             <td>
                                 @if($index->gambar && Storage::disk('public')->exists('gambar/' . $index->gambar))
                                     <img src="{{ asset('storage/gambar/' . $index->gambar) }}" 

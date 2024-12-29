@@ -44,4 +44,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/search-barang', [HomeController::class, 'searchBarang'])->name('search.barang');
     Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
+    Route::get('/home/{id}/detail', [HomeController::class, 'detail'])->name('home.detail');
+    Route::put('/home/{id}/stok-minimal', [HomeController::class, 'updateStokMinimal'])->name('home.updateStokMinimal');
 });

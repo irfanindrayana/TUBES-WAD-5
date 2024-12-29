@@ -13,8 +13,9 @@ class Home extends Model
 
     protected $fillable = [
         'namaBarang',
+        'gambar',
         'deskripsi',
         'stok',
-        'gambar'
+        'stok_minimal'
     ];
 }
