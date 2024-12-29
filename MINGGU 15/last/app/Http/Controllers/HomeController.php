@@ -10,7 +10,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $datastok = Home::where('stok', '<', 5)->get();
+        $datastok = Home::whereRaw('stok <= stok_minimal')->get();
         $homes = Home::all();
         
         return view('home.index', compact('datastok', 'homes'));
@@ -149,5 +149,25 @@ class HomeController extends Controller
             ->get();
 
         return view('home.detail', compact('barang', 'barangMasuk', 'barangKeluar', 'peminjaman'));
+    }
+
+    public function updateStokMinimal(Request $request, $id)
+    {
+        // Validasi hanya admin yang bisa mengakses
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('home.detail', $id)
+                ->with('error', 'Hanya admin yang dapat mengubah stok minimal.');
+        }
+
+        $request->validate([
+            'stok_minimal' => 'required|integer|min:1'
+        ]);
+
+        $barang = Home::findOrFail($id);
+        $barang->stok_minimal = $request->stok_minimal;
+        $barang->save();
+
+        return redirect()->route('home.detail', $id)
+            ->with('success', 'Stok minimal untuk "' . $barang->namaBarang . '" berhasil diupdate!');
     }
 }

@@ -4,7 +4,17 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">DETAIL BARANG</h1>
+    <h1 class="mt-4 mb-3">DETAIL BARANG</h1>
+    <div class="mb-4">
+        <a href="{{ route('home.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+        @if(Auth::user()->isAdmin())
+            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#stokMinimalModal">
+                <i class="fas fa-exclamation-triangle"></i> Stok Minimal
+            </button>
+        @endif
+    </div>
     
     <div class="card mb-4">
         <div class="card-body">
@@ -174,10 +184,34 @@
         </div>
     </div>
 
-    <div class="mb-4">
-        <a href="{{ route('home.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Kembali
-        </a>
+    <!-- Modal Stok Minimal -->
+    <div class="modal fade" id="stokMinimalModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Set Stok Minimal</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form method="POST" action="{{ route('home.updateStokMinimal', $barang->id) }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Stok Minimal</label>
+                            <input type="number" name="stok_minimal" class="form-control" 
+                                   value="{{ $barang->stok_minimal ?? 5 }}" min="1" required>
+                            <small class="form-text text-muted">
+                                Sistem akan memberikan peringatan ketika stok barang kurang dari nilai ini
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 

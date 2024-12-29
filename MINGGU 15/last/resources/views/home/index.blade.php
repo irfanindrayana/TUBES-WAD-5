@@ -84,7 +84,7 @@
             @foreach($datastok as $item)
             <div class="alert alert-danger alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong>PERHATIAN!</strong> Stok <strong>{{ $item->namaBarang }}</strong> akan habis.
+                <strong>PERHATIAN!</strong> Stok <strong>{{ $item->namaBarang }}</strong> saat ini ({{ $item->stok }}) telah mencapai batas minimal ({{ $item->stok_minimal }}).
             </div>
             @endforeach
             
